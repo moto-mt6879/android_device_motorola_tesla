@@ -11,8 +11,8 @@
     </string-array>
 
     <string-array name="turbo_modes_values">
-        <item>4000000</item>
-        <item>7500000</item>
-        <item>12500000</item>
+        <item>3000000</item>
+        <item>5000000</item>
+        <item>6000000</item>
     </string-array>
 </resources>

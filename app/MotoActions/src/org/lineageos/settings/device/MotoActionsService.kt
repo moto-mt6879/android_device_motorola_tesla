@@ -96,7 +96,7 @@ class MotoActionsService : Service() {
         Log.i(TAG, "isTurbo=$turboEnabled")
         val defaultValue = "3000000"
         val currentValue = if (turboEnabled) {
-            sharedPrefs.getString("turbo_current", "12500000") ?: "12500000"
+            sharedPrefs.getString("turbo_current", "6000000") ?: "6000000"
         } else {
             defaultValue
         }

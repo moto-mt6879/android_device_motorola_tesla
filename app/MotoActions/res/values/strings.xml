@@ -13,7 +13,7 @@
     <string name="turbo_enable_title">Enable TurboPower Charging</string>
     <string name="turbo_charge_summary">Limit charging wattage to control heat during charging</string>
     <string name="turbo_charge_current_pref_title">Charging speed limit</string>
-    <string name="turbo_mode_one">Slow (18W)</string>
-    <string name="turbo_mode_two">Medium (33W)</string>
-    <string name="turbo_mode_three">Max (68W)</string>
+    <string name="turbo_mode_one">Slow (15W)</string>
+    <string name="turbo_mode_two">Medium (25W)</string>
+    <string name="turbo_mode_three">Max (30W)</string>
 </resources>
