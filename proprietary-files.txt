@@ -3,6 +3,10 @@
 ## variant: RETAIL
 
 # Audio
+vendor/lib64/hw/audio.primary.mediatek.so;SYMLINK=vendor/lib64/hw/audio.primary.mt6879.so
+vendor/lib64/libaudio_param_parser-vnd.so
+vendor/lib64/lib_lvacfs.so
+vendor/lib64/liblvacfs_wrapper.so
 vendor/etc/AudioLog_dynamic.xml
 vendor/etc/ap_gain.bin
 vendor/etc/ap_gain_mmul.bin
@@ -120,6 +124,16 @@ vendor/etc/audio_param/VolumeGainMap_AudioParam.xml
 vendor/etc/audio_param/VolumeGainMap_ParamUnitDesc.xml
 vendor/etc/audio_param/Volume_AudioParam.xml
 vendor/etc/audio_param/Volume_ParamUnitDesc.xml
+
+# Audio (LVACFS Params)
+vendor/etc/lvacfs_params/3mic/LVACFS_Audiozoom.txt
+vendor/etc/lvacfs_params/3mic/LVACFS_Audiozoom_NR.txt
+vendor/etc/lvacfs_params/3mic/LVACFS_Calibration_3mic.dat
+vendor/etc/lvacfs_params/3mic/LVACFS_Configuration.txt
+vendor/etc/lvacfs_params/3mic/audiozoom_1.txt
+vendor/etc/lvacfs_params/3mic/audiozoom_101.txt
+vendor/etc/lvacfs_params/3mic/audiozoom_102.txt
+vendor/etc/lvacfs_params/3mic/audiozoom_3.txt
 
 # Audio (firmware)
 vendor/firmware/aw882xx_acf.bin
@@ -485,6 +499,7 @@ vendor/lib64/vendor.mediatek.hardware.camera.security@1.0.so
 
 # Camera (arcsoft)
 vendor/etc/arcsoft_calibration_u_dc.bin
+vendor/lib64/libArcNetMtk.so
 vendor/lib64/tesla_arcsoft_portrait_super_night_se_raw.bin
 vendor/lib64/tesla_arcsoft_super_night_raw.bin
 vendor/lib64/tesla_arcsoft_super_night_se_raw.bin
@@ -655,7 +670,7 @@ product/app/MotCamera3AI/MotCamera3AI.apk;PRESIGNED
 product/etc/permissions/deviceowner-configuration-com.motorola.camera3.xml
 product/etc/permissions/privapp-permissions-com.motorola.camera3.xml
 product/etc/sysconfig/hiddenapi-whitelist-com.motorola.camera3.xml
-product/priv-app/MotCamera4/MotCamera4.apk;PRESIGNED
+product/priv-app/MotCamera4/MotCamera4.apk
 system/app/MotoSignatureApp/MotoSignatureApp.apk;PRESIGNED
 system/etc/permissions/com.motorola.motosignature.xml
 system/etc/permissions/moto-core_services.xml
@@ -730,6 +745,9 @@ vendor/app/mcRegistry/abcd270ea5c44c58bcd3384a2fa2539e.tabin
 vendor/app/mcRegistry/attpre_6716af0c135559728ae9e9754da47ccd.tabin
 vendor/app/mcRegistry/e97c270ea5c44c58bcd3384a2fa2539e.tabin
 vendor/app/mcRegistry/ffffffff000000000000000000000003.tabin
+vendor/lib64/librsumodem.so
+vendor/lib64/vendor.trustonic.alps.alps_device@1.0.so
+vendor/lib64/vendor.trustonic.alps.alps_device@1.1.so
 
 # Vibrator (firmware)
 vendor/firmware/aw86715_rtp_Attentive.bin
