@@ -22,7 +22,6 @@ class BootCompletedReceiver : BroadcastReceiver() {
             Intent(context, MotoActionsService::class.java),
             UserHandle.CURRENT,
         )
-        felicaDisabler(context)
         turboChargingDisabler(context)
     }
 
@@ -40,21 +39,6 @@ class BootCompletedReceiver : BroadcastReceiver() {
             Log.i(TAG, "Turbo charging control support: $isSupported")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to set TurboChargingActivity enabled state", e)
-        }
-    }
-
-    private fun felicaDisabler(context: Context) {
-        val sku = SystemProperties.get("ro.boot.hardware.sku", "")
-        val isJapaneseVariant = sku == "XT2307-3"
-        val flag = if (isJapaneseVariant) {
-            PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-        } else {
-            PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-        }
-        try {
-            context.packageManager.setApplicationEnabledSetting("com.felicanetworks.mfc", flag, 0)
-        } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "Failed to set Felica enabled state", e)
         }
     }
 
