@@ -8,24 +8,11 @@
 
 #include "UdfpsHandler.h"
 #include <android-base/logging.h>
-#include <android-base/properties.h>
-#include <com/motorola/hardware/biometric/fingerprint/1.0/IMotoFingerPrint.h>
 #include <drm/mediatek_drm.h>
 #include <fcntl.h>
 #include <dlfcn.h>
 #include <sys/ioctl.h>
-#include <thread>
 #include <mutex>
-#include <vector>
-
-using ::com::motorola::hardware::biometric::fingerprint::V1_0::IMotFodEventResult;
-using ::com::motorola::hardware::biometric::fingerprint::V1_0::IMotFodEventType;
-using ::com::motorola::hardware::biometric::fingerprint::V1_0::IMotoFingerPrint;
-using ::android::sp;
-using ::android::hardware::hidl_vec;
-
-#define NOTIFY_FINGER_UP IMotFodEventType::FINGER_UP
-#define NOTIFY_FINGER_DOWN IMotFodEventType::FINGER_DOWN
 
 enum HBM_STATE { OFF = 0, ON = 2 };
 
@@ -56,12 +43,25 @@ void setHbmState(int state) {
 
 class TeslaUdfpsHandler : public UdfpsHandler {
   public:
-    TeslaUdfpsHandler() : hbmFodEnabled(false), mMotoFingerprint(nullptr) {
-        mIsEgis = android::base::GetProperty("vendor.hw.fps.ident", "") == "egis";
+    TeslaUdfpsHandler() : hbmFodEnabled(false), mRbsHandle(nullptr), mExtraApi(nullptr) {
+        mRbsHandle = dlopen("libRbsFlow.so", RTLD_NOW);
+        if (mRbsHandle) {
+            mExtraApi = reinterpret_cast<rbs_extra_api_t>(dlsym(mRbsHandle, "rbs_extra_api"));
+            if (!mExtraApi) {
+                LOG(ERROR) << "Failed to dlsym rbs_extra_api: " << dlerror();
+            }
+        } else {
+            LOG(WARNING) << "Failed to dlopen libRbsFlow.so: " << dlerror();
+        }
     }
 
     ~TeslaUdfpsHandler() override {
         disableHighBrightFod();
+        if (mRbsHandle) {
+            dlclose(mRbsHandle);
+            mRbsHandle = nullptr;
+            mExtraApi = nullptr;
+        }
     }
 
     void onFingerDown(uint32_t x, uint32_t y, float minor, float major) override {
@@ -69,16 +69,18 @@ class TeslaUdfpsHandler : public UdfpsHandler {
         (void)y;
         (void)minor;
         (void)major;
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
         enableHighBrightFod();
-
-        std::thread([this]() {
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
-            onFingerUp();
-        }).detach();
     }
 
     void onFingerUp() override {
+        disableHighBrightFod();
+    }
+
+    void onAuthenticationSucceeded() override {
+        disableHighBrightFod();
+    }
+
+    void onAuthenticationFailed() override {
         disableHighBrightFod();
     }
 
@@ -87,35 +89,18 @@ class TeslaUdfpsHandler : public UdfpsHandler {
     }
 
   private:
-    sp<IMotoFingerPrint> getMotoFingerprint() {
-        if (!mMotoFingerprint) {
-            mMotoFingerprint = IMotoFingerPrint::tryGetService();
-            if (!mMotoFingerprint) {
-                LOG(WARNING) << "Failed to get IMotoFingerPrint service via tryGetService";
-            }
-        }
-        return mMotoFingerprint;
-    }
+    typedef int (*rbs_extra_api_t)(uint32_t, const uint8_t*, uint32_t, uint8_t*, uint32_t*);
 
-    void extraApiWrapper(int cidValue) {
-        void* rbs_handle = dlopen("libRbsFlow.so", RTLD_NOW);
-        if (!rbs_handle) {
-            LOG(WARNING) << "Failed to dlopen libRbsFlow.so: " << dlerror();
-            return;
-        }
-
-        typedef int (*rbs_extra_api_t)(uint32_t, const uint8_t*, uint32_t, uint8_t*, uint32_t*);
-        auto extra_api = reinterpret_cast<rbs_extra_api_t>(dlsym(rbs_handle, "rbs_extra_api"));
-        if (extra_api) {
-            int cid[1] = {cidValue};
-            int rc = extra_api(7, reinterpret_cast<const uint8_t*>(cid), sizeof(cid), nullptr, nullptr);
+    void extraApiWrapper(uint32_t cidValue) {
+        if (mExtraApi) {
+            uint32_t in_data[2] = {cidValue, 3};
+            uint8_t out_buf[32] = {0};
+            uint32_t out_len = sizeof(out_buf);
+            int rc = mExtraApi(7, reinterpret_cast<const uint8_t*>(in_data), sizeof(in_data), out_buf, &out_len);
             if (rc != 0) {
                 LOG(ERROR) << "rbs_extra_api(7, " << cidValue << ") failed, error: " << rc;
             }
-        } else {
-            LOG(ERROR) << "Failed to dlsym rbs_extra_api: " << dlerror();
         }
-        dlclose(rbs_handle);
     }
 
     void disableHighBrightFod() {
@@ -124,15 +109,7 @@ class TeslaUdfpsHandler : public UdfpsHandler {
         if (!hbmFodEnabled)
             return;
 
-        if (mIsEgis) {
-            extraApiWrapper(102);
-        } else {
-            auto motoFingerprint = getMotoFingerprint();
-            if (motoFingerprint) {
-                motoFingerprint->sendFodEvent(NOTIFY_FINGER_UP, {},
-                                               [](IMotFodEventResult, const hidl_vec<signed char> &) {});
-            }
-        }
+        extraApiWrapper(102);
         setHbmState(OFF);
 
         hbmFodEnabled = false;
@@ -145,23 +122,15 @@ class TeslaUdfpsHandler : public UdfpsHandler {
             return;
 
         setHbmState(ON);
-        if (mIsEgis) {
-            extraApiWrapper(101);
-        } else {
-            auto motoFingerprint = getMotoFingerprint();
-            if (motoFingerprint) {
-                motoFingerprint->sendFodEvent(NOTIFY_FINGER_DOWN, {},
-                                               [](IMotFodEventResult, const hidl_vec<signed char> &) {});
-            }
-        }
+        extraApiWrapper(101);
 
         hbmFodEnabled = true;
     }
 
     bool hbmFodEnabled;
-    bool mIsEgis;
     std::mutex mSetHbmFodMutex;
-    sp<IMotoFingerPrint> mMotoFingerprint;
+    void* mRbsHandle;
+    rbs_extra_api_t mExtraApi;
 };
 
 static UdfpsHandler* create_handler() {
