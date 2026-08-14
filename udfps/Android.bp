@@ -1,6 +1,6 @@
 cc_library_shared {
     name: "libudfpshandler",
-    srcs: ["ManausUdfpsHandler.cpp"],
+    srcs: ["TeslaUdfpsHandler.cpp"],
     vendor: true,
     shared_libs: [
         "libbase",

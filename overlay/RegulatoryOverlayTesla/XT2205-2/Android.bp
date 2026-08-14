@@ -1,4 +1,4 @@
 runtime_resource_overlay {
-    name: "RegulatoryOverlayXT2307-2",
+    name: "RegulatoryOverlayXT2205-2",
     vendor: true,
 }

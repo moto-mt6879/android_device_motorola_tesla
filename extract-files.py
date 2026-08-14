@@ -23,7 +23,7 @@ from extract_utils.main import (
 namespace_imports = [
     'device/motorola/mt6879-common',
     'vendor/motorola/mt6879-common',
-    'device/motorola/manaus',
+    'device/motorola/tesla',
     'hardware/mediatek',
     'hardware/mediatek/libaedv',
     'hardware/motorola',
@@ -54,8 +54,8 @@ blob_fixups: blob_fixups_user_type = {
 }  # fmt: skip
 
 module = ExtractUtilsModule(
-    'manaus',
     'motorola',
+    'tesla',
     blob_fixups=blob_fixups,
     lib_fixups=lib_fixups,
     namespace_imports=namespace_imports,

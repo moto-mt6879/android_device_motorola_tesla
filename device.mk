@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-DEVICE_PATH := device/motorola/manaus
+DEVICE_PATH := device/motorola/tesla
 
 # Audio
 PRODUCT_COPY_FILES += \
@@ -35,7 +35,7 @@ PRODUCT_COPY_FILES += \
 
 # MotoActions
 PRODUCT_PACKAGES += \
-    MotoActionsManaus
+    MotoActionsTesla
 
 # NFC
 PRODUCT_PACKAGES += \
@@ -68,10 +68,10 @@ PRODUCT_COPY_FILES += \
 PRODUCT_ENFORCE_RRO_TARGETS := *
 
 PRODUCT_PACKAGES += \
-    FrameworkOverlayManaus \
-    RegulatoryOverlayXT2307-1 \
-    RegulatoryOverlayXT2307-2 \
-    RegulatoryOverlayXT2307-3
+    FrameworkOverlayTesla \
+    RegulatoryOverlayXT2205-1 \
+    RegulatoryOverlayXT2205-2 \
+    RegulatoryOverlayXT2205-3
 
 # Soong namespaces
 PRODUCT_SOONG_NAMESPACES += \
@@ -83,4 +83,4 @@ PRODUCT_SOONG_NAMESPACES += \
 $(call inherit-product, device/motorola/mt6879-common/mt6879.mk)
 
 # Inherit the proprietary files
-$(call inherit-product, vendor/motorola/manaus/manaus-vendor.mk)
+$(call inherit-product, vendor/motorola/tesla/tesla-vendor.mk)

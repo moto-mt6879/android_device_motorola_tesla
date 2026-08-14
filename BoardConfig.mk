@@ -4,10 +4,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-DEVICE_PATH := device/motorola/manaus
+DEVICE_PATH := device/motorola/tesla
 
 # Bootloader
-TARGET_BOOTLOADER_BOARD_NAME := manaus
+TARGET_BOOTLOADER_BOARD_NAME := tesla
 
 # DTBO
 BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilts/dtbo.img
@@ -47,4 +47,4 @@ BOARD_AVB_VBMETA_SYSTEM_ROLLBACK_INDEX := 30
 include device/motorola/mt6879-common/BoardConfigCommon.mk
 
 # Inherit the proprietary files
-include vendor/motorola/manaus/BoardConfigVendor.mk
+include vendor/motorola/tesla/BoardConfigVendor.mk

@@ -5,7 +5,7 @@
 //
 
 runtime_resource_overlay {
-    name: "FrameworkOverlayManaus",
+    name: "FrameworkOverlayTesla",
     resource_dirs: ["res"],
     vendor: true,
 }

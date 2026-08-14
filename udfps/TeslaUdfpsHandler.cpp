@@ -54,13 +54,13 @@ void setHbmState(int state) {
 }
 } // namespace
 
-class ManausUdfpsHandler : public UdfpsHandler {
+class TeslaUdfpsHandler : public UdfpsHandler {
   public:
-    ManausUdfpsHandler() : hbmFodEnabled(false), mMotoFingerprint(nullptr) {
+    TeslaUdfpsHandler() : hbmFodEnabled(false), mMotoFingerprint(nullptr) {
         mIsEgis = android::base::GetProperty("vendor.hw.fps.ident", "") == "egis";
     }
 
-    ~ManausUdfpsHandler() override {
+    ~TeslaUdfpsHandler() override {
         disableHighBrightFod();
     }
 
@@ -165,7 +165,7 @@ class ManausUdfpsHandler : public UdfpsHandler {
 };
 
 static UdfpsHandler* create_handler() {
-    return new ManausUdfpsHandler();
+    return new TeslaUdfpsHandler();
 }
 
 static void destroy_handler(UdfpsHandler* handler) {

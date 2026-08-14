@@ -4,7 +4,7 @@
 //
 
 android_app {
-    name: "MotoActionsManaus",
+    name: "MotoActionsTesla",
     overrides: ["MotoActions"],
     defaults: ["SettingsLibDefaults"],
 
