@@ -1,5 +1,6 @@
 mkp.ko
 bootprof.ko
+bq25980_mmi.ko
 mtk-uart-apdma.ko
 8250_mtk.ko
 dbgtop-drm.ko
@@ -35,7 +36,6 @@ mtk-spmi-pmic.ko
 spmi-mtk-pmif.ko
 mt6315-regulator.ko
 mt6363-regulator.ko
-wl2864c-regulator.ko
 mtk-vmm-spm.ko
 mtk-scpsys.ko
 mtk-scpsys-mt6879.ko
@@ -63,10 +63,8 @@ mdp_drv_mt6879.ko
 mtk-mml.ko
 mtk-mml-mt6879.ko
 mtk_panel_ext.ko
-dsi-panel-mot-tianma-vtdr6115-655-fhdp-dphy-vdo-144hz.ko
-dsi-panel-mot-csot-vtdr6115-655-fhdp-dphy-vdo-144hz-c7.ko
-dsi-panel-mot-tm-vtdr6115-655-fhdp-dphy-vdo-144hz-u8.ko
-dsi-panel-mot-boe-nt37701a-655-fhdp-cmd-144hz.ko
+dsi-panel-mot-tianma-nt37701a-655-fhdp-dphy-cmd-144hz.ko
+dsi-panel-mot-tianma-nt37701a-655-fhdp-dphy-cmd-rode.ko
 dsi-panel-mot-dummy-vdo-60hz.ko
 mediatek-drm.ko
 mmprofile.ko
@@ -114,7 +112,7 @@ mt6375-adc.ko
 mt6375-auxadc.ko
 rt5133-regulator.ko
 rt6160-regulator.ko
-bq25980_mmi.ko
+wl2864c-regulator.ko
 adapter_class.ko
 charger_class.ko
 mtk_charger_algorithm_class.ko
@@ -127,12 +125,12 @@ tcpc_class.ko
 tcpc_mt6375.ko
 mtk_chg_type_det.ko
 mtk_pd_adapter.ko
+mtk_pep50.ko
 mtk_pep40.ko
 mtk_pd_charging.ko
 mtk_pep20.ko
 moto_wlc_alg.ko
 mtk_pep.ko
-mtk_pep50.ko
 mtk_charger_framework.ko
 rt_pd_manager.ko
 mt6375-battery.ko
@@ -175,9 +173,3 @@ emi-slb.ko
 sec.ko
 cache-parity.ko
 emi-mpu-hook-v1.ko
-focaltech_v3.ko
-goodix_brl_mmi.ko
-mmi_info.ko
-mmi_relay.ko
-sensors_class.ko
-touchscreen_mmi.ko

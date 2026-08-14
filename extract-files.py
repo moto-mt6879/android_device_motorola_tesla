@@ -45,17 +45,11 @@ blob_fixups: blob_fixups_user_type = {
         .add_needed('liblog.so'),
     'vendor/lib64/libstfactory-vendor.so': blob_fixup()
         .add_needed('libbase_shim.so'),
-    'vendor/etc/libnfc-nxp_220.conf': blob_fixup()
-        .regex_replace('DEFAULT_ISODEP_ROUTE=0x01', 'DEFAULT_ISODEP_ROUTE=0xC0')
-        .regex_replace('DEFAULT_SYS_CODE_ROUTE=0x01', 'DEFAULT_SYS_CODE_ROUTE=0xC0')
-        .regex_replace('DEFAULT_OFFHOST_ROUTE=0x01', 'DEFAULT_OFFHOST_ROUTE=0xC0')
-        .regex_replace('OFFHOST_ROUTE_ESE={01}', 'OFFHOST_ROUTE_ESE={C0}')
-        .add_line_if_missing('DEFAULT_NFCF_ROUTE=0xC0'),
 }  # fmt: skip
 
 module = ExtractUtilsModule(
-    'motorola',
     'tesla',
+    'motorola',
     blob_fixups=blob_fixups,
     lib_fixups=lib_fixups,
     namespace_imports=namespace_imports,

@@ -26,5 +26,5 @@ PRODUCT_GMS_CLIENTID_BASE := android-motorola
 
 PRODUCT_BUILD_PROP_OVERRIDES += \
     DeviceName=tesla \
-    BuildDesc="tesla_g_sys-user 15 V1ST35H.71-19 8f321-0f3d0 release-keys" \
-    BuildFingerprint=motorola/tesla_g_sys/tesla:15/V1ST35H.71-19/8f321-0f3d0:user/release-keys
+    BuildDesc="tesla_g_sys-user 15 V1ST35H.71-19-12 8f321-0f3d0 release-keys" \
+    BuildFingerprint=motorola/tesla_g_sys/tesla:15/V1ST35H.71-19-12/8f321-0f3d0:user/release-keys
