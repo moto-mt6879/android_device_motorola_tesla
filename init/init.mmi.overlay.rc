@@ -1,18 +1,20 @@
 on early-init
-    exec_background u:r:vendor_modprobe:s0 -- /vendor/bin/modprobe -a -d /vendor/lib/modules mmi_gauge_class nfg1000_fg_mmi smart_battery qpnp_adaptive_charge sensors_class leds-gpio awinic_sar sx937x_sar
+   insmod /vendor/lib/modules/cps_wls_charger.ko
+   insmod /vendor/lib/modules/qpnp_adaptive_charge.ko
+   insmod /vendor/lib/modules/sensors_class.ko
+   insmod /vendor/lib/modules/chipone_tddi_mmi.ko
+   insmod /vendor/lib/modules/mmi_sys_temp.ko
+   insmod /vendor/lib/modules/goodix_mmi.ko
+   insmod /vendor/lib/modules/sx937x_sar.ko
+   insmod /vendor/lib/modules/aw86715.ko
+   insmod /vendor/lib/modules/pn557.ko
+   insmod /vendor/lib/modules/ets_fod_mmi.ko
+   insmod /vendor/lib/modules/leds-gpio.ko
 
-on early-init && property:ro.boot.radio=4
-    setprop ro.vendor.hw.fuelgauge int_fg
-
-on early-init && property:ro.boot.radio=DOCOMO
-    setprop ro.vendor.hw.fuelgauge int_fg
-
-on init
-    setprop ro.vendor.hw.fuelgauge ext_fg
+on property:ro.build.type=userdebug
+    insmod /vendor/lib/modules/watchdogtest.ko
 
 on post-fs-data
-    wait /sys/class/leds/vibrator/trigger 1.5
-    write /sys/class/leds/vibrator/trigger "transient"
     # calibration
     mkdir /data/vendor/sensor 0774 system system
     # Sensor
@@ -24,16 +26,12 @@ on post-fs-data
     write /sys/devices/virtual/touchscreen/primary/double_tap_enabled 1
     chown system system /sys/devices/virtual/touchscreen/primary/double_tap_pressed
     chmod 0660 /sys/devices/virtual/touchscreen/primary/double_tap_pressed
-  
-
     # config fingerprint
     mkdir /data/vendor/.fps 0770 system vendor_fingerp
     mkdir /mnt/vendor/persist/fps 0770 system system
     mkdir /data/vendor/egis 0770 system vendor_fingerp
     mkdir /data/vendor/egis/cqa 0770 system vendor_fingerp
     mkdir /mnt/vendor/persist/egis 0770 system vendor_fingerp
-    mkdir /mnt/vendor/persist/goodix 0770 system vendor_fingerp
-    mkdir /data/vendor/gf_data 0770 system system
 
     # Required by touchRec for write the touch data
     mkdir /data/vendor/touchrec 0770 input input
@@ -41,11 +39,6 @@ on post-fs-data
     chown input input /data/vendor/touchrec/lastbootuuid
     chown input input /data/vendor/touchrec/touch_data.txt
     chmod 0664 /data/vendor/touchrec/touch_data.txt
-
-    # change dir permission
-    mkdir /data/vendor/camera_dump
-    chown root camera /data/vendor/camera_dump
-    chmod 0770 /data/vendor/camera_dump
 
 on late-init
     #moto algo params
@@ -63,6 +56,8 @@ on late-init
     chown system system /sys/class/sensors/capsense_top_right/enable
     chown system system /sys/class/sensors/capsense_top_right/poll_delay
 
+    insmod /vendor/lib/modules/aw882xx_dlkm.ko
+
 service capsense_reset /vendor/bin/capsense_reset
     class core
     user system
@@ -77,22 +72,6 @@ service nxpnfcinfo /vendor/bin/nxpnfcinfo
     group nfc
     user system
     oneshot
-
-on property:vendor.qti.nfc.chipid=0xca
-    setprop persist.vendor.nfc.config_file_name libnfc-nxp_560.conf
-    start vendor.nfc_hal_service
-
-on property:vendor.qti.nfc.chipid=0xc1 && property:ro.boot.product.hardware.sku=be
-    setprop persist.vendor.nfc.config_file_name libnfc-nxp_220.conf 
-    start vendor.nfc_hal_service
-
-on property:vendor.qti.nfc.chipid=0xc1 && property:ro.boot.product.hardware.sku=de
-    setprop persist.vendor.nfc.config_file_name libnfc-nxp_220e.conf
-    start vendor.nfc_hal_service
-
-on property:vendor.qti.nfc.chipid=0xc1 && property:ro.boot.product.hardware.sku=dn
-    setprop persist.vendor.nfc.config_file_name libnfc-nxp.conf
-    start vendor.nfc_hal_service
 
 service vendor.nfc_hal_service /vendor/bin/hw/android.hardware.nfc-service.nxp
     override
@@ -111,32 +90,19 @@ service vendor.secure_element_hal_service /vendor/bin/hw/android.hardware.secure
     group secure_element
     disabled
 
-on property:ro.vendor.hw.nfc=nq
+# NFC driver
+on property:ro.vendor.hw.nfc=nxp
    insmod /vendor/lib/modules/nxp_i2c.ko
    wait /dev/nq-nci
    chown nfc nfc /dev/nq-nci
    chmod 0666 /dev/nq-nci
-   start vendor.nfc_hal_service
-
-on property:ro.vendor.hw.nfc=ese_nq
-   insmod /vendor/lib/modules/nxp_i2c.ko
-   insmod /vendor/lib/modules/nxp_ese.ko
-   wait /dev/nq-nci
-   chown nfc nfc /dev/nq-nci
-   chmod 0666 /dev/nq-nci
-   wait /dev/p73
-   chown secure_element secure_element /dev/p73
-   chmod 0666 /dev/p73
-   start vendor.nfc_hal_service
 
 on property:sys.boot_completed=1
-    start capsense_reset
-    chown system system /sys/class/touchscreen/primary/stylus_mode
-    chmod 0660 /sys/class/touchscreen/primary/stylus_mode
-    chown system system /sys/class/touchscreen/primary/stowed
-    chmod 0660 /sys/class/touchscreen/primary/stowed
-    write /proc/sys/vm/dirty_background_bytes 26214400
-    write /proc/sys/vm/dirty_bytes 104857600
+  start capsense_reset
+  chown system system /sys/class/touchscreen/primary/stylus_mode
+  chmod 0660 /sys/class/touchscreen/primary/stylus_mode
+  write /proc/sys/vm/dirty_background_bytes 26214400
+  write /proc/sys/vm/dirty_bytes 104857600
 
 # Turn on led to indicate device on in factory mode
 on property:ro.bootmode=mot-factory
@@ -148,81 +114,66 @@ on early-boot
     chown system system /sys/devices/platform/112b0000.ufshci/ufshid/trigger
 
 on boot
-    # change permission for capsensor
-    chown system system /sys/class/capsense/reset
-    chown system system /sys/class/capsense/int_state
-    chown radio system /sys/class/capsense/reg
-    chown radio system /sys/class/capsense/fw_download_status
-    chown system system /sys/class/capsense/mode
-    chmod 0660 /sys/class/capsense/reset
-    chmod 0660 /sys/class/capsense/int_state
-    chmod 0660 /sys/class/capsense/reg
-    chmod 0660 /sys/class/capsense/fw_download_status
-    chmod 0660 /sys/class/capsense/mode
+   write /sys/class/i2c-dev/i2c-9/device/9-0030/wireless_fw_update 1
+   # Set wls perms for HAL
+   chown system system /sys/class/power_supply/wireless/device/pen_control
+   chown system system /sys/class/power_supply/wireless/device/tx_mode
+   chown system system /sys/class/power_supply/wireless/device/wls_input_current_limit
+   chown system system /sys/class/power_supply/wireless/device/folio_mode
+   chmod 0660 /sys/class/power_supply/wireless/device/pen_control
+   chmod 0660 /sys/class/power_supply/wireless/device/tx_mode
+   chmod 0660 /sys/class/power_supply/wireless/device/wls_input_current_limit
+   chmod 0660 /sys/class/power_supply/wireless/device/folio_mode
+   # change permission for capsensor
+   chown system system /sys/class/capsense/reset
+   chown system system /sys/class/capsense/int_state
+   chown radio system /sys/class/capsense/reg
+   chown radio system /sys/class/capsense/fw_download_status
+   chmod 0660 /sys/class/capsense/reset
+   chmod 0660 /sys/class/capsense/int_state
+   chmod 0660 /sys/class/capsense/reg
+   chmod 0660 /sys/class/capsense/fw_download_status
 
-    # Change ownership and permission for charge pump factory testing
-    chown system system /sys/class/power_supply/cp-master/voltage_now
-    chown system system /sys/class/power_supply/cp-master/device/force_chg_auto_enable
-    chown system system /sys/class/power_supply/cp-slave/device/force_chg_auto_enable
-    chmod 0644 /sys/class/power_supply/cp-master/voltage_now
-    chmod 0664 /sys/class/power_supply/cp-master/device/force_chg_auto_enable
-    chmod 0664 /sys/class/power_supply/cp-slave/device/force_chg_auto_enable
-
-    chown system system /sys/class/power_supply/cp-standalone/voltage_now
-    chown system system /sys/class/power_supply/cp-standalone/device/force_chg_auto_enable
-    chmod 0644 /sys/class/power_supply/cp-standalone/voltage_now
-    chmod 0664 /sys/class/power_supply/cp-standalone/device/force_chg_auto_enable
-
+  # Change ownership and permission for cp-standalone factory testing
+  chown system system /sys/class/power_supply/cp-standalone/voltage_now
+  chown system system  /sys/class/power_supply/cp-standalone/device/force_chg_auto_enable
+  chmod 0644 /sys/class/power_supply/cp-standalone/voltage_now
 # Set adaptive charging perms for HAL
-    chown system system /sys/module/qpnp_adaptive_charge/parameters/upper_limit
-    chown system system /sys/module/qpnp_adaptive_charge/parameters/lower_limit
-    # touch api
-    chown system system /sys/class/touchscreen/primary/interpolation
-    chmod 0660 /sys/class/touchscreen/primary/interpolation
-    chown system system /sys/class/touchscreen/primary/first_filter
-    chmod 0660 /sys/class/touchscreen/primary/first_filter
-    chown system system /sys/class/touchscreen/primary/edge
-    chmod 0660 /sys/class/touchscreen/primary/edge
-    chown system system /sys/class/touchscreen/primary/gesture
-    chmod 0660 /sys/class/touchscreen/primary/gesture
-    chown system system /sys/class/touchscreen/primary/sample
-    chmod 0660 /sys/class/touchscreen/primary/sample
+  chown system system /sys/module/qpnp_adaptive_charge/parameters/upper_limit
+  chown system system /sys/module/qpnp_adaptive_charge/parameters/lower_limit
+   # touch api
+   chown system system /sys/class/touchscreen/primary/interpolation
+   chmod 0660 /sys/class/touchscreen/primary/interpolation
+   chown system system /sys/class/touchscreen/primary/first_filter
+   chmod 0660 /sys/class/touchscreen/primary/first_filter
+   chown system system /sys/class/touchscreen/primary/edge
+   chmod 0660 /sys/class/touchscreen/primary/edge
+   chown system system /sys/class/touchscreen/primary/gesture
+   chmod 0660 /sys/class/touchscreen/primary/gesture
 
-    # change permission for goodix TP
-    chmod 0664 /dev/gtp_tools
+  # set aw smart pa node can be accessed by audio group
+  chown root audio /sys/devices/platform/11e02000.i2c/i2c-6/6-0035/cali_re
+  chmod 0664 /sys/devices/platform/11e02000.i2c/i2c-6/6-0035/cali_re
 
-    # set aw smart pa node can be accessed by audio group
-    chown root audio /sys/devices/platform/11e02000.i2c/i2c-6/6-0035/cali_re
-    chmod 0664 /sys/devices/platform/11e02000.i2c/i2c-6/6-0035/cali_re
+  # Set wlc perms for chg
+  chown vendor_tcmd system /sys/class/power_supply/wireless/device/tx_mode_vout
 
+  # Set wlc perms for HAL
+  chown system system /sys/class/power_supply/wireless/device/wlc_light_ctl
+  chown system system /sys/class/power_supply/wireless/device/wlc_fan_speed
+  chown system system /sys/class/power_supply/wireless/device/wlc_st_changed
+  chown system system /sys/class/power_supply/wireless/device/wlc_tx_power
+  chown system system /sys/class/power_supply/wireless/device/wlc_tx_type
+  chown system system /sys/class/power_supply/wireless/device/wlc_tx_capability
+  chmod 0660 /sys/class/power_supply/wireless/device/wlc_light_ctl
+  chmod 0660 /sys/class/power_supply/wireless/device/wlc_fan_speed
 
 on fs
-    exec_background u:r:vendor_modprobe:s0 -- /vendor/bin/modprobe -a -d /vendor/lib/modules mmi_relay touchscreen_mmi goodix_brl_mmi focaltech_v3
+   exec_background u:r:vendor_modprobe:s0 -- /vendor/bin/modprobe -a -d /vendor/lib/modules mmi_relay touchscreen_mmi goodix_brl_mmi
 
 # camera eeprom calibration
 on property:sys.boot_completed=1
-    chmod 0644 /data/vendor/camera_dump/mot_ov50a_eeprom.bin
-    chmod 0644 /data/vendor/camera_dump/mot_hi1336_eeprom.bin
-    chmod 0644 /data/vendor/camera_dump/mot_ov32b_eeprom.bin
-
-on moto-post-fs-data-fs-tune
-    write /sys/block/${dev.mnt.dev.root}/queue/read_ahead_kb 2048
-    write /sys/block/${dev.mnt.dev.system_ext}/queue/read_ahead_kb 2048
-    write /sys/block/${dev.mnt.dev.product}/queue/read_ahead_kb 2048
-    write /sys/block/${dev.mnt.dev.vendor}/queue/read_ahead_kb 2048
-    write /sys/block/${dev.mnt.dev.vendor_dlkm}/queue/read_ahead_kb 2048
-    write /sys/block/${dev.mnt.dev.data}/queue/read_ahead_kb 2048
-
-on moto-boot-completed-fs-tune
-    write /sys/block/dm-0/queue/read_ahead_kb 512
-    write /sys/block/dm-1/queue/read_ahead_kb 512
-    write /sys/block/dm-2/queue/read_ahead_kb 512
-    write /sys/block/dm-3/queue/read_ahead_kb 512
-    write /sys/block/dm-4/queue/read_ahead_kb 512
-    write /sys/block/dm-5/queue/read_ahead_kb 512
-    write /sys/block/${dev.mnt.dev.root}/queue/read_ahead_kb 512
-    write /sys/block/${dev.mnt.dev.system_ext}/queue/read_ahead_kb 512
-    write /sys/block/${dev.mnt.dev.product}/queue/read_ahead_kb 512
-    write /sys/block/${dev.mnt.dev.vendor}/queue/read_ahead_kb 512
-    write /sys/block/${dev.mnt.dev.vendor_dlkm}/queue/read_ahead_kb 512
-    write /sys/block/${dev.mnt.dev.data}/queue/read_ahead_kb 512
+  chmod 0644 /data/vendor/camera_dump/mot_ov50a_eeprom.bin
+  chmod 0644 /data/vendor/camera_dump/mot_hi1336_eeprom.bin
+  chmod 0644 /data/vendor/camera_dump/mot_ov32c_eeprom.bin
+  chmod 0644 /data/vendor/camera_dump/mot_gc02m1b_eeprom.bin
