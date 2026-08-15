@@ -73,6 +73,9 @@ service nxpnfcinfo /vendor/bin/nxpnfcinfo
     user system
     oneshot
 
+on property:ro.vendor.hw.nfc=nxp && property:persist.vendor.nfc.config_file_name=libnfc-nxp_557.conf
+    start vendor.nfc_hal_service
+
 service vendor.nfc_hal_service /vendor/bin/hw/android.hardware.nfc-service.nxp
     override
     class early_hal
